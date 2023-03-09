@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<style>
+  head {text-align: center;}
+  td {
+        border: 1px solid black;
+        padding: 5px;
+        text-align: center;
+      }
+</style>
+<head>
+    <title>Model Demo</title>
+</head>
+<body>
+    <h1>Model Demo</h1>
+    <button id="new-button" onclick="callEndpoint()">New Vector</button>
+    <p id="vector-display">Click Button for new vector</p>
+    <table id="vector"></table>
+    <hr/>
+    <p id="class-response">The classification label is: </p>
+    <script>
+      let newVecButton = document.getElementById("new-button");
+      let vec_p = document.getElementById("vector-display")
+      let res_p = document.getElementById("class-response")
+
+
+      getVector = () => {
+        const floatList = [];
+        for (let i = 0; i < 10; i++) {
+          const float = Math.random() * 6 - 3; // generates random float between -3 and 3
+          floatList.push(float.toFixed(2)); // rounds float to 2 decimal places and adds it to the list
+        }
+        return floatList;
+      }
+
+      newVecButton.onclick = () => {
+        vec_p.textContent = "The Generated Vector"
+        let vector = getVector()
+        console.log(vector);
+        const table = document.getElementById('vector');
+
+        while(table.firstChild) table.removeChild(table.firstChild)
+
+        const row = document.createElement('tr');
+        for (let i = 0; i < vector.length; i++) {
+          const newRow = table.insertRow();
+          const indexCell = newRow.insertCell(0);
+          const floatCell = newRow.insertCell(1);
+
+          indexCell.innerHTML = i + 1;
+          floatCell.innerHTML = vector[i];
+        }
+
+        res_p.textContent = "Waiting for response..."
+
+        fetch('/class-model', {
+          method: 'POST',
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ "vector": vector }),
+        })
+          .then(response => response.text())
+          .then(msg => {
+            res_p.textContent = msg
+            console.log(msg);
+          });
+      }
+    </script>
+</body>
+</html>
